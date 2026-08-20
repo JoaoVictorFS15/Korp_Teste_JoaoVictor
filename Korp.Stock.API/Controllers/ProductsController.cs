@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Korp.Stock.API.Data;
-using Korp.Stock.API.Models;
+using Korp.Stock.API.DTOs;
+using Korp.Stock.API.Services;
 
 namespace Korp.Stock.API.Controllers;
 
@@ -9,48 +8,43 @@ namespace Korp.Stock.API.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
-    private readonly StockDbContext _context;
+    private readonly IProductAppService _appService;
 
-    public ProductsController(StockDbContext context)
+    public ProductsController(IProductAppService appService)
     {
-        _context = context;
+        _appService = appService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _context.Products.ToListAsync());
+        var result = await _appService.GetAllProductsAsync();
+        return Ok(result);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Product product)
+    public async Task<IActionResult> Create(CreateProductRequestDto request)
     {
-        _context.Products.Add(product);
-        await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetAll), new { id = product.Id }, product);
+        var result = await _appService.CreateProductAsync(request);
+        return CreatedAtAction(nameof(GetAll), new { id = result.Id }, result);
     }
 
-    public class DeductStockRequest { public int Quantity { get; set; } }
-
     [HttpPost("{id}/deduct")]
-    public async Task<IActionResult> DeductStock(int id, [FromBody] DeductStockRequest request)
+    public async Task<IActionResult> DeductStock(int id, [FromBody] DeductStockRequestDto request)
     {
-        var product = await _context.Products.FindAsync(id);
-        if (product == null) return NotFound();
+        var result = await _appService.DeductStockAsync(id, request.Quantity);
 
-        if (product.Balance < request.Quantity)
-            return BadRequest(new { Message = "Saldo insuficiente no estoque." });
-
-        product.Balance -= request.Quantity;
-
-        try
+        if (!result.Success)
         {
-            await _context.SaveChangesAsync();
-            return Ok(new { Message = "Estoque atualizado.", product.Balance });
+            if (result.Message.Contains("não encontrado"))
+                return NotFound(new { result.Message });
+
+            if (result.Message.Contains("simultaneamente"))
+                return Conflict(new { result.Message });
+
+            return BadRequest(new { result.Message });
         }
-        catch (DbUpdateConcurrencyException)
-        {
-            return Conflict(new { Message = "O saldo deste produto foi modificado simultaneamente por outra transação. Tente novamente." });
-        }
+
+        return Ok(new { result.Message, Balance = result.NewBalance });
     }
 }

@@ -14,8 +14,6 @@ public class Product
     
     public int Balance { get; set; }
 
-    // Requisito Opcional A: Tratamento de Concorrência
-    // Este campo garante que se 2 notas baixarem o saldo simultaneamente, o EF lançará uma DbUpdateConcurrencyException
     [Timestamp]
     public byte[]? RowVersion { get; set; }
 }
