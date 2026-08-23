@@ -1,0 +1,79 @@
+<div class="row">
+  <!-- Coluna da Esquerda: Formulário -->
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <h5 class="card-title fw-bold text-primary mb-4">
+          <i class="bi bi-plus-circle-fill me-2"></i>Novo Produto
+        </h5>
+
+        <form #form="ngForm" (ngSubmit)="createProduct(form)">
+          <div class="mb-3">
+            <label class="form-label text-muted fw-semibold small text-uppercase">Código do Produto</label>
+            <input type="text" class="form-control form-control-lg bg-light" name="code" [(ngModel)]="newProduct.code"
+                   required pattern="^[a-zA-Z0-9]+$" placeholder="Ex: P001" #code="ngModel">
+            <div *ngIf="code.invalid && code.dirty" class="text-danger small mt-1"><i class="bi bi-exclamation-triangle"></i> Só letras e números.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted fw-semibold small text-uppercase">Descrição</label>
+            <input type="text" class="form-control form-control-lg bg-light" name="description" [(ngModel)]="newProduct.description"
+                   required placeholder="Ex: Teclado Mecânico">
+          </div>
+          <div class="mb-4">
+            <label class="form-label text-muted fw-semibold small text-uppercase">Saldo em Estoque</label>
+            <input type="number" class="form-control form-control-lg bg-light" name="balance" [(ngModel)]="newProduct.balance"
+                   required min="0" pattern="^[0-9]+$" #balance="ngModel">
+            <div *ngIf="balance.invalid && balance.dirty" class="text-danger small mt-1"><i class="bi bi-exclamation-triangle"></i> Não pode ser negativo.</div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm" [disabled]="!form.valid">
+            <i class="bi bi-check2-circle me-1"></i> Salvar Produto
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Coluna da Direita: Tabela -->
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h5 class="card-title fw-bold text-secondary mb-4">
+          <i class="bi bi-boxes me-2"></i>Estoque Atual
+        </h5>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light text-muted small text-uppercase">
+              <tr>
+                <th>ID</th>
+                <th>Código</th>
+                <th>Descrição</th>
+                <th class="text-end">Saldo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let prod of products">
+                <td class="text-muted">#{{ prod.id }}</td>
+                <td class="fw-bold">{{ prod.code }}</td>
+                <td>{{ prod.description }}</td>
+                <td class="text-end" [ngClass]="{'text-danger fw-bold': prod.balance <= 0}">
+                  <span class="badge rounded-pill" [ngClass]="prod.balance > 0 ? 'bg-success' : 'bg-danger'">
+                    {{ prod.balance }} unid.
+                  </span>
+                </td>
+              </tr>
+
+              <!-- Empty State Elegante -->
+              <tr *ngIf="products.length === 0">
+                <td colspan="4" class="text-center text-muted py-5">
+                  <i class="bi bi-inbox text-secondary" style="font-size: 3rem;"></i>
+                  <p class="mt-2 mb-0 fw-semibold">Nenhum produto encontrado</p>
+                  <small>Cadastre um novo produto ao lado para iniciar.</small>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

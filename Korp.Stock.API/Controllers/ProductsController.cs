@@ -26,7 +26,10 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> Create(CreateProductRequestDto request)
     {
         var result = await _appService.CreateProductAsync(request);
-        return CreatedAtAction(nameof(GetAll), new { id = result.Id }, result);
+
+        if (!result.Success)
+            return BadRequest(new { Message = result.Message });
+        return CreatedAtAction(nameof(GetAll), new { id = result.Product.Id }, result.Product);
     }
 
     [HttpPost("{id}/deduct")]

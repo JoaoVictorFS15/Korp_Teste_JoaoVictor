@@ -8,7 +8,7 @@ namespace Korp.Stock.API.Services;
 public interface IProductAppService
 {
     Task<IEnumerable<ProductResponseDto>> GetAllProductsAsync();
-    Task<ProductResponseDto> CreateProductAsync(CreateProductRequestDto dto);
+    Task<(bool Success, string Message, ProductResponseDto? Product)> CreateProductAsync(CreateProductRequestDto dto);
     Task<(bool Success, string Message, int? NewBalance)> DeductStockAsync(int id, int quantity);
 }
 
@@ -33,25 +33,29 @@ public class ProductAppService : IProductAppService
         });
     }
 
-    public async Task<ProductResponseDto> CreateProductAsync(CreateProductRequestDto dto)
+    public async Task<(bool Success, string Message, ProductResponseDto? Product)> CreateProductAsync(CreateProductRequestDto dto)
     {
+        var existingProducts = await _repository.GetAllAsync();
+        if (existingProducts.Any(p => p.Code.Equals(dto.Code, StringComparison.OrdinalIgnoreCase)))
+        {
+            return (false, "Já existe um produto cadastrado com este código.", null);
+        }
         var product = new Product
         {
             Code = dto.Code,
             Description = dto.Description,
             Balance = dto.Balance
         };
-
         await _repository.AddAsync(product);
         await _repository.SaveChangesAsync();
-
-        return new ProductResponseDto
+        var responseDto = new ProductResponseDto
         {
             Id = product.Id,
             Code = product.Code,
             Description = product.Description,
             Balance = product.Balance
         };
+        return (true, "Produto criado com sucesso.", responseDto);
     }
 
     public async Task<(bool Success, string Message, int? NewBalance)> DeductStockAsync(int id, int quantity)
