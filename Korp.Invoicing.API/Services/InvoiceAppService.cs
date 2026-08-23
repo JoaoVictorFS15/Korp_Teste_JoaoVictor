@@ -1,16 +1,10 @@
-using Korp.Invoicing.API.DTOs;
+﻿using Korp.Invoicing.API.DTOs;
 using Korp.Invoicing.API.Models;
 using Korp.Invoicing.API.Repositories;
 
 namespace Korp.Invoicing.API.Services;
 
-public interface IInvoiceAppService
-{
-    Task<IEnumerable<InvoiceResponseDto>> GetAllInvoicesAsync();
-    Task<InvoiceResponseDto?> GetInvoiceByIdAsync(int id);
-    Task<InvoiceResponseDto> CreateInvoiceAsync(CreateInvoiceRequestDto dto);
-    Task<(bool Success, string Message, InvoiceResponseDto? Invoice)> PrintInvoiceAsync(int id, string idempotencyKey);
-}
+
 
 public class InvoiceAppService : IInvoiceAppService
 {
@@ -60,7 +54,7 @@ public class InvoiceAppService : IInvoiceAppService
     {
         var invoice = await _repository.GetByIdAsync(id);
         if (invoice == null)
-            return (false, "Nota Fiscal não encontrada.", null);
+            return (false, "Nota Fiscal nÃ£o encontrada.", null);
 
         if (invoice.Status != InvoiceStatus.Aberta)
             return (false, "Apenas notas com status Aberta podem ser impressas.", null);
@@ -71,11 +65,11 @@ public class InvoiceAppService : IInvoiceAppService
             {
                 var success = await _stockService.DeductStockAsync(item.ProductId, item.Quantity);
                 if (!success)
-                    return (false, $"Serviço de estoque indisponível ou saldo insuficiente para o produto {item.ProductId}.", null);
+                    return (false, $"ServiÃ§o de estoque indisponÃ­vel ou saldo insuficiente para o produto {item.ProductId}.", null);
             }
             catch(Exception)
             {
-                return (false, "Erro na comunicação com o Serviço de Estoque. A nota não foi impressa. Tente novamente.", null);
+                return (false, "Erro na comunicaÃ§Ã£o com o ServiÃ§o de Estoque. A nota nÃ£o foi impressa. Tente novamente.", null);
             }
         }
 
@@ -102,3 +96,4 @@ public class InvoiceAppService : IInvoiceAppService
         };
     }
 }
+

@@ -1,16 +1,11 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Korp.Stock.API.DTOs;
 using Korp.Stock.API.Models;
 using Korp.Stock.API.Repositories;
 
 namespace Korp.Stock.API.Services;
 
-public interface IProductAppService
-{
-    Task<IEnumerable<ProductResponseDto>> GetAllProductsAsync();
-    Task<(bool Success, string Message, ProductResponseDto? Product)> CreateProductAsync(CreateProductRequestDto dto);
-    Task<(bool Success, string Message, int? NewBalance)> DeductStockAsync(int id, int quantity);
-}
+
 
 public class ProductAppService : IProductAppService
 {
@@ -38,7 +33,7 @@ public class ProductAppService : IProductAppService
         var existingProducts = await _repository.GetAllAsync();
         if (existingProducts.Any(p => p.Code.Equals(dto.Code, StringComparison.OrdinalIgnoreCase)))
         {
-            return (false, "Já existe um produto cadastrado com este código.", null);
+            return (false, "JÃ¡ existe um produto cadastrado com este cÃ³digo.", null);
         }
         var product = new Product
         {
@@ -62,7 +57,7 @@ public class ProductAppService : IProductAppService
     {
         var product = await _repository.GetByIdAsync(id);
         if (product == null)
-            return (false, "Produto não encontrado.", null);
+            return (false, "Produto nÃ£o encontrado.", null);
 
         if (product.Balance < quantity)
             return (false, "Saldo insuficiente no estoque.", null);
@@ -76,7 +71,8 @@ public class ProductAppService : IProductAppService
         }
         catch (DbUpdateConcurrencyException)
         {
-            return (false, "O saldo deste produto foi modificado simultaneamente por outra transação. Tente novamente.", null);
+            return (false, "O saldo deste produto foi modificado simultaneamente por outra transaÃ§Ã£o. Tente novamente.", null);
         }
     }
 }
+
