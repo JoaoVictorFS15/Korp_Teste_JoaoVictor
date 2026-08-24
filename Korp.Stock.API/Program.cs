@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Korp.Stock.API.Data;
 using Korp.Stock.API.Repositories;
 using Korp.Stock.API.Services;
@@ -41,3 +41,4 @@ app.UseCors("AllowAll");
 app.MapControllers();
 
 app.Run();
+

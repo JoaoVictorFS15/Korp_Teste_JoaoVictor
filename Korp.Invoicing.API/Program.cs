@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Korp.Invoicing.API.Data;
 using Korp.Invoicing.API.Services;
 using Korp.Invoicing.API.Repositories;
@@ -51,3 +51,4 @@ app.UseCors("AllowAll");
 app.MapControllers();
 
 app.Run();
+
