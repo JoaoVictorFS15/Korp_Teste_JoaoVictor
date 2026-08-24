@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Korp.Stock.API.DTOs;
 using Korp.Stock.API.Services;
 
@@ -39,7 +39,7 @@ public class ProductsController : ControllerBase
 
         if (!result.Success)
         {
-            if (result.Message.Contains("não encontrado"))
+            if (result.Message.Contains("nÃ£o encontrado"))
                 return NotFound(new { result.Message });
 
             if (result.Message.Contains("simultaneamente"))
@@ -49,5 +49,13 @@ public class ProductsController : ControllerBase
         }
 
         return Ok(new { result.Message, Balance = result.NewBalance });
+    }
+
+    [HttpPost("deduct-bulk")]
+    public async Task<IActionResult> DeductStockBulk([FromBody] DeductStockBulkRequestDto request)
+    {
+        var result = await _appService.DeductStockBulkAsync(request.Items);
+        if (!result.Success) return BadRequest(new { result.Message });
+        return Ok(new { result.Message });
     }
 }

@@ -74,5 +74,25 @@ public class ProductAppService : IProductAppService
             return (false, "O saldo deste produto foi modificado simultaneamente por outra transaÃ§Ã£o. Tente novamente.", null);
         }
     }
-}
 
+    public async Task<(bool Success, string Message)> DeductStockBulkAsync(List<DeductStockBulkItemDto> items)
+    {
+        foreach (var item in items)
+        {
+            var product = await _repository.GetByIdAsync(item.ProductId);
+            if (product == null) return (false, "Serviço de estoque indisponível ou saldo insuficiente para o produto " + item.ProductId + ".");
+            if (product.Balance < item.Quantity) return (false, "Serviço de estoque indisponível ou saldo insuficiente para o produto " + item.ProductId + ".");
+            product.Balance -= item.Quantity;
+        }
+
+        try
+        {
+            await _repository.SaveChangesAsync(); // Transação Atômica do EF Core!
+            return (true, "Estoque atualizado em lote com sucesso.");
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return (false, "Houve uma modificação simultânea no estoque de um dos produtos. Tente novamente.");
+        }
+    }
+}

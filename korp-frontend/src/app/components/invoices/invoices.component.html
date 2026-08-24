@@ -1,1 +1,102 @@
-<p>invoices works!</p>
+<div class="row">
+  <!-- Coluna da Esquerda: Nova Nota Fiscal -->
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <h5 class="card-title fw-bold text-primary mb-4">
+          <i class="bi bi-receipt-cutoff me-2"></i>Nova Nota Fiscal
+        </h5>
+
+        <form #form="ngForm" (ngSubmit)="createInvoice(form)">
+
+          <label class="form-label text-muted fw-semibold small text-uppercase">Itens da Nota</label>
+
+          <!-- Lista Dinâmica de Produtos -->
+          <div *ngFor="let item of newItems; let i = index" class="row mb-2 align-items-center g-2">
+
+            <div class="col-7">
+              <select class="form-select bg-light" name="product{{i}}" [(ngModel)]="item.productId" required>
+                <option [ngValue]="null" disabled>Selecione o Produto...</option>
+                <option *ngFor="let prod of products" [ngValue]="prod.id">
+                  {{ prod.code }} (Saldo: {{ prod.balance }})
+                </option>
+              </select>
+            </div>
+
+            <div class="col-3">
+              <input type="number" class="form-control bg-light" name="quantity{{i}}" [(ngModel)]="item.quantity" min="1" required placeholder="Qtd">
+            </div>
+
+            <div class="col-2 text-end">
+              <button type="button" class="btn btn-outline-danger btn-sm w-100" title="Remover Item" (click)="removeItemRow(i)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+
+          </div>
+          <button type="button" class="btn btn-outline-secondary btn-sm mb-4 w-100 dashed-border" (click)="addNewItemRow()">
+            <i class="bi bi-plus-lg"></i> Adicionar outro produto
+          </button>
+          <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm" [disabled]="!form.valid">
+            <i class="bi bi-file-earmark-plus me-1"></i> Gerar Nota (Aberta)
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Coluna da Direita: Histórico de Notas -->
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h5 class="card-title fw-bold text-secondary mb-4">
+          <i class="bi bi-journals me-2"></i>Histórico de Notas Fiscais
+        </h5>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light text-muted small text-uppercase">
+              <tr>
+                <th>Número</th>
+                <th>Data</th>
+                <th>Itens</th>
+                <th>Status</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let inv of invoices">
+                <td class="fw-bold text-primary">NF-{{ inv.sequentialNumber | number:'3.0' }}</td>
+                <td>{{ inv.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="text-muted">
+                  {{ inv.items.length }} produto(s) <br>
+                  <small class="fw-bold">({{ getTotalQuantity(inv) }} unid. no total)</small>
+                </td>
+                <td>
+                  <span class="badge rounded-pill" [ngClass]="inv.status === 'Aberta' ? 'bg-warning text-dark' : 'bg-success'">
+                    {{ inv.status }}
+                  </span>
+                </td>
+                <td class="text-end">
+
+                  <button *ngIf="inv.status === 'Aberta'" class="btn btn-sm btn-success shadow-sm fw-bold" (click)="printInvoice(inv.id!)">
+                    <i class="bi bi-printer-fill me-1"></i> Imprimir
+                  </button>
+                  <span *ngIf="inv.status !== 'Aberta'" class="text-muted small">
+                    <i class="bi bi-check2-all text-success fs-5"></i>
+                  </span>
+                </td>
+              </tr>
+
+              <tr *ngIf="invoices.length === 0">
+                <td colspan="5" class="text-center text-muted py-5">
+                  <i class="bi bi-receipt text-secondary" style="font-size: 3rem;"></i>
+                  <p class="mt-2 mb-0 fw-semibold">Nenhuma Nota Fiscal gerada</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

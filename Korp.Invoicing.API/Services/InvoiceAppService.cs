@@ -59,18 +59,14 @@ public class InvoiceAppService : IInvoiceAppService
         if (invoice.Status != InvoiceStatus.Aberta)
             return (false, "Apenas notas com status Aberta podem ser impressas.", null);
 
-        foreach (var item in invoice.Items)
+        try 
         {
-            try 
-            {
-                var success = await _stockService.DeductStockAsync(item.ProductId, item.Quantity);
-                if (!success)
-                    return (false, $"ServiÃ§o de estoque indisponÃ­vel ou saldo insuficiente para o produto {item.ProductId}.", null);
-            }
-            catch(Exception)
-            {
-                return (false, "Erro na comunicaÃ§Ã£o com o ServiÃ§o de Estoque. A nota nÃ£o foi impressa. Tente novamente.", null);
-            }
+            var result = await _stockService.DeductStockBulkAsync(invoice.Items);
+            if (!result.Success) return (false, result.Message, null);
+        }
+        catch(Exception)
+        {
+            return (false, "Erro na comunicação com o Serviço de Estoque. A nota não foi impressa. Tente novamente.", null);
         }
 
         invoice.Status = InvoiceStatus.Fechada;
@@ -96,4 +92,6 @@ public class InvoiceAppService : IInvoiceAppService
         };
     }
 }
+
+
 
