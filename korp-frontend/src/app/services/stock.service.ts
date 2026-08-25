@@ -20,4 +20,8 @@ export class StockService {
   createProduct(product: Product): Observable<Product> {
     return this.http.post<Product>(this.apiUrl, product);
   }
+
+  enhanceDescriptionWithAI(description: string): Observable<{ description: string }> {
+    return this.http.post<{ description: string }>(`${this.apiUrl}/ai/enhance-description`, { description });
+  }
 }

@@ -58,4 +58,33 @@ public class ProductsController : ControllerBase
         if (!result.Success) return BadRequest(new { result.Message });
         return Ok(new { result.Message });
     }
+
+    [HttpPost("ai/enhance-description")]
+    public async Task<IActionResult> EnhanceDescription([FromBody] AiRequestDto req, [FromServices] IConfiguration config)
+    {
+        var apiKey = config["GeminiApiKey"];
+        if (string.IsNullOrEmpty(apiKey) || apiKey.Contains("SUA_CHAVE_AQUI")) 
+            return BadRequest(new { message = "Chave da API Gemini nÃ£o configurada. Lembre de rodar o dotnet user-secrets set." });
+        
+        using var httpClient = new HttpClient();
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={apiKey}";
+        var payload = new { contents = new[] { new { parts = new[] { new { text = $"Melhore a descriÃ§Ã£o deste produto para ficar profissional e atrativa (mÃ¡ximo 12 palavras). Retorne APENAS o texto direto: " + req.Description } } } } };
+        
+        var response = await httpClient.PostAsJsonAsync(url, payload);
+        if (!response.IsSuccessStatusCode) {
+            var error = await response.Content.ReadAsStringAsync();
+            return BadRequest(new { message = "Falha ao conectar com a IA: " + error });
+        }
+
+        try {
+            var rawJson = await response.Content.ReadAsStringAsync();
+            using var doc = System.Text.Json.JsonDocument.Parse(rawJson);
+            var enhancedText = doc.RootElement.GetProperty("candidates")[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
+            return Ok(new { description = enhancedText?.Trim() });
+        } catch (Exception ex) { 
+            return BadRequest(new { message = "Erro ao processar resposta da IA: " + ex.Message }); 
+        }
+    }
 }
+
+

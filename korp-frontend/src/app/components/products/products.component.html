@@ -8,23 +8,27 @@
         </h5>
 
         <form #form="ngForm" (ngSubmit)="createProduct(form)">
+          
           <div class="mb-3">
-            <label class="form-label text-muted fw-semibold small text-uppercase">Código do Produto</label>
-            <input type="text" class="form-control form-control-lg bg-light" name="code" [(ngModel)]="newProduct.code"
-                   required pattern="^[a-zA-Z0-9]+$" placeholder="Ex: P001" #code="ngModel">
-            <div *ngIf="code.invalid && code.dirty" class="text-danger small mt-1"><i class="bi bi-exclamation-triangle"></i> Só letras e números.</div>
+            <label class="form-label text-muted fw-semibold small text-uppercase">Código / SKU</label>
+            <input type="text" class="form-control form-control-lg bg-light" name="code" [(ngModel)]="newProduct.code" required placeholder="Ex: T001">
           </div>
+
           <div class="mb-3">
             <label class="form-label text-muted fw-semibold small text-uppercase">Descrição</label>
-            <input type="text" class="form-control form-control-lg bg-light" name="description" [(ngModel)]="newProduct.description"
-                   required placeholder="Ex: Teclado Mecânico">
+            <div class="input-group">
+              <input type="text" class="form-control form-control-lg bg-light" name="description" [(ngModel)]="newProduct.description" required placeholder="Ex: Teclado">
+              <button type="button" class="btn btn-outline-primary" (click)="enhanceWithAI()" title="Melhorar com IA">✨ IA</button>
+            </div>
           </div>
+          
           <div class="mb-4">
             <label class="form-label text-muted fw-semibold small text-uppercase">Saldo em Estoque</label>
             <input type="number" class="form-control form-control-lg bg-light" name="balance" [(ngModel)]="newProduct.balance"
                    required min="0" pattern="^[0-9]+$" #balance="ngModel">
             <div *ngIf="balance.invalid && balance.dirty" class="text-danger small mt-1"><i class="bi bi-exclamation-triangle"></i> Não pode ser negativo.</div>
           </div>
+          
           <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm" [disabled]="!form.valid">
             <i class="bi bi-check2-circle me-1"></i> Salvar Produto
           </button>
@@ -32,6 +36,7 @@
       </div>
     </div>
   </div>
+  
   <!-- Coluna da Direita: Tabela -->
   <div class="col-md-8">
     <div class="card border-0 shadow-sm">

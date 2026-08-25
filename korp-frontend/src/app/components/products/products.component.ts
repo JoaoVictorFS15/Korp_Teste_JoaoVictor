@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Product } from '../../models/product.model';
@@ -61,4 +61,16 @@ export class ProductsComponent {
     });
   }
 
+
+  enhanceWithAI(): void {
+    if (!this.newProduct.description) {
+      Swal.fire('Atenção', 'Digite pelo menos uma palavra na descrição para a IA.', 'info');
+      return;
+    }
+    Swal.fire({ title: 'Pensando...', text: 'A IA está reescrevendo a descrição...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    this.stockService.enhanceDescriptionWithAI(this.newProduct.description).subscribe({
+      next: (res) => { this.newProduct.description = res.description; Swal.close(); },
+      error: (err) => Swal.fire('Erro', err.error?.message || 'Falha na IA.', 'error')
+    });
+  }
 }
